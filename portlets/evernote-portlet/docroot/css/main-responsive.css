@@ -1,0 +1,14 @@
+@import "mixins";
+
+@include respond-to(phone, tablet) {
+    
+    .aui .evernote-organizer-portlet .row-fluid {
+        .span4,
+        .span6,
+        .span8 {
+            width: 100%;
+            margin: 0;
+        }
+    }
+
+}
