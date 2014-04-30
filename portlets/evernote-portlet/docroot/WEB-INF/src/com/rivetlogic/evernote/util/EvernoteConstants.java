@@ -25,7 +25,7 @@ public final class EvernoteConstants {
 	 * sandbox server to the Evernote production server.
 	 */
 	public static final EvernoteService EVERNOTE_SERVICE = EvernoteService.PRODUCTION;
-	
+	public static final String EVERNOTE_SERVICE_NOTEBOOK_URL = "/shard/s1/view/notebook/";
 	
 	public static final String ACCESS_TOKEN = "accessToken";
 	public static final String REQUEST_TOKEN = "requestToken";
@@ -34,5 +34,39 @@ public final class EvernoteConstants {
 	
 	public static final String NOTES_LOADED = "notesLoaded";
 	public static final String NOTES_LOADED_DEFAULT_VALUE = "3";
-
+	
+	public static final String GUID = "guid";
+	public static final String NOTE_NAME = "name";
+	public static final String NOTE_GUID = "noteGuid";
+	public static final String NOTE_TITLE = "title";
+	public static final String NOTE_LIST = "noteList";
+	public static final String NOTE_CONTENT = "noteContent";
+	public static final String NOTEBOOK_GUID = "notebookGuid";
+	public static final String EDIT_NOTE_URL = "editNoteURL";
+	public static final String AUTHORIZATION_URL = "authorizationUrl";
+	public static final String SUCCESS_KEY = "success";
+	
+	public static final String NEW_NOTE_NOTEBOOK = "newNoteNotebook";
+	public static final String NEW_NOTEBOOK_NAME = "newNotebookName";
+	public static final String NEW_NOTE_TITLE = "newNoteTitle";
+	public static final String NOTE_GUID_DELETE = "noteGuidDelete";
+	
+	public static final String LOAD_NOTES_ACTION = "loadNotes";
+	public static final String LOAD_MORE_NOTES_ACTION = "loadMoreNotes";
+	
+	public static final String SELECT_NOTE_ACTION = "selectNote";
+	public static final String LOAD_MORE = "loadMore";
+	public static final String COUNT_LIST = "countLI";
+	public static final String OAUTH_VERIFIER = "oauth_verifier";
+	public static final String CLOSE_WINDOW = "closeWindow";
+	
+	public static final String JSP_PAGE = "jspPage";
+	public static final String GUID_SUCCESSFULL_CREATED_MESSAGE = "Successfully created a new notebook with GUID: ";
+	public static final String GUID_SUCCESSFULL_DELETED_MESSAGE = "Successfully deleted note with the GUID: ";
+	public static final String JSON_RETURNING_ERROR = "Error while returning json";
+	public static final String INVALID_API_KEY_ERROR = "Invalid Api key";
+	
+	public static final String CREATE_NOTE_JSP = "create-note-jsp";
+	
+	
 }

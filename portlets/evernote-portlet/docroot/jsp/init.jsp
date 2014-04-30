@@ -25,14 +25,18 @@
 <%@ taglib uri="http://liferay.com/tld/theme" prefix="liferay-theme" %>
 <%@ taglib uri="http://liferay.com/tld/ui" prefix="liferay-ui" %>
 
-<%@page import="com.liferay.portal.SystemException"%>
+<%@page import="com.liferay.portal.kernel.servlet.SessionErrors"%>
+<%@page import="com.liferay.portal.kernel.exception.SystemException"%>
+
 <%@page import="com.evernote.edam.error.EDAMNotFoundException"%>
 <%@page import="com.evernote.thrift.TException"%>
 <%@page import="com.evernote.edam.error.EDAMSystemException"%>
 <%@page import="com.evernote.edam.error.EDAMUserException"%>
+
 <%@page import="com.rivetlogic.evernote.exception.NoNoteException"%>
+<%@page import="com.rivetlogic.evernote.exception.InvalidApiKeyException"%>
 
 <portlet:defineObjects />
 <liferay-theme:defineObjects />
 
-<c:set var="pns"><portlet:namespace /></c:set>
+<c:set var="pns"><portlet:namespace/></c:set>

@@ -1,0 +1,53 @@
+<%--
+ /*
+ * Copyright (C) 2005-2014 Rivet Logic Corporation.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; version 2
+ * of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ * Boston, MA 02110-1301, USA.
+ */
+--%>
+
+<script id="note-list-li" type="text/x-html-template">
+	<li id="{guid}" class="note-item">{title}</li>
+</script>
+<script id="note-list-template" type="text/x-handlebars-template">
+    {{#each notes}}
+        <div class="notebook-wrapper">
+            {{#if noteList}}
+            <div class="notebook-header collapsed toggle">{{name}}</div>
+            {{else}}
+            <div class="notebook-header">{{name}}</div>
+            {{/if}}
+                    <div class="notes-wrapper" style="display:none">
+                    <ul>
+                        {{#each noteList}}
+                            <li class="note-item" id="{{guid}}">{{title}}</li>
+                        {{/each}}
+                        {{#if loadMore}}
+                            <li id="{{guid}}" class="load-more-notes">
+                                <liferay-ui:message key="load-more-notes"/>
+                            </li>
+                        {{/if}}
+                    </ul>
+                </div>
+        </div>
+    {{/each}}
+</script>
+<script id="ajax-loader-icon" type="text/x-html-template">
+    <img src='../images/ajax-loader-big.gif' />
+</script>
+<script id="frame-content" type="text/x-html-template">
+    <span class="select-note"><liferay-ui:message key="select-note-left-menu"/></span>
+</script>

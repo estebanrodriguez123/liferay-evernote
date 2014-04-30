@@ -19,22 +19,15 @@ package com.rivetlogic.evernote.util;
 
 import static com.rivetlogic.evernote.util.EvernoteConstants.ACCESS_TOKEN;
 import static com.rivetlogic.evernote.util.EvernoteConstants.EVERNOTE_SERVICE;
-import static com.rivetlogic.evernote.util.EvernoteConstants.NOTES_LOADED;
-import static com.rivetlogic.evernote.util.EvernoteConstants.NOTES_LOADED_DEFAULT_VALUE;
 import static com.rivetlogic.evernote.util.EvernoteConstants.REQUEST_TOKEN;
 import static com.rivetlogic.evernote.util.EvernoteConstants.REQUEST_TOKEN_SECRET;
+import static com.rivetlogic.evernote.util.EvernoteConstants.INVALID_API_KEY_ERROR;
+import static com.rivetlogic.evernote.util.EvernoteConstants.OAUTH_VERIFIER;
+import static com.rivetlogic.evernote.util.EvernoteConstants.AUTHORIZATION_URL;
+import static com.rivetlogic.evernote.util.EvernoteConstants.CLOSE_WINDOW;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.List;
-
-import javax.portlet.ActionRequest;
-import javax.portlet.ActionResponse;
-import javax.portlet.PortletException;
-import javax.portlet.PortletPreferences;
 import javax.portlet.PortletSession;
 import javax.portlet.RenderRequest;
-import javax.portlet.ResourceRequest;
 import javax.servlet.http.HttpServletRequest;
 
 import org.scribe.builder.ServiceBuilder;
@@ -45,28 +38,12 @@ import org.scribe.oauth.OAuthService;
 
 import com.evernote.auth.EvernoteAuth;
 import com.evernote.auth.EvernoteService;
-import com.evernote.clients.ClientFactory;
-import com.evernote.clients.NoteStoreClient;
-import com.evernote.edam.error.EDAMNotFoundException;
-import com.evernote.edam.error.EDAMSystemException;
-import com.evernote.edam.error.EDAMUserException;
-import com.evernote.edam.notestore.NoteFilter;
-import com.evernote.edam.type.Note;
-import com.evernote.edam.type.NoteSortOrder;
-import com.evernote.edam.type.Notebook;
-import com.evernote.thrift.TException;
 import com.liferay.portal.kernel.exception.SystemException;
-import com.liferay.portal.kernel.json.JSONArray;
-import com.liferay.portal.kernel.json.JSONFactoryUtil;
-import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
-import com.rivetlogic.evernote.exception.NoNoteException;
+import com.rivetlogic.evernote.exception.InvalidApiKeyException;
 import com.rivetlogic.evernote.portlet.EvernoteKeys;
 
 /**
@@ -76,7 +53,10 @@ import com.rivetlogic.evernote.portlet.EvernoteKeys;
 public class EvernoteUtil {
 	private static Log LOG = LogFactoryUtil.getLog(EvernoteUtil.class);
 	
-	public static OAuthService getOAuthService(HttpServletRequest request, ThemeDisplay themeDisplay) throws SystemException {
+	public static OAuthService getOAuthService(HttpServletRequest request, ThemeDisplay themeDisplay) 
+		throws SystemException, InvalidApiKeyException {
+		
+		OAuthService service = null;
 		String consumerKey = ""; 
 		String consumerSecret = "";
 
@@ -92,59 +72,58 @@ public class EvernoteUtil {
 		try {
 			consumerKey = EvernoteKeys.getConsumerKey(themeDisplay.getCompanyId());
 			consumerSecret = EvernoteKeys.getConsumerSecret(themeDisplay.getCompanyId());
-		} catch (SystemException e) {
-			LOG.error(e);
-			throw e;
+			
+			service = new ServiceBuilder().provider(providerClass)
+							.apiKey(consumerKey).apiSecret(consumerSecret).callback(cbUrl)
+							.build();
+	
+		} catch (IllegalArgumentException e) {
+			LOG.error(INVALID_API_KEY_ERROR);
+			throw new InvalidApiKeyException(INVALID_API_KEY_ERROR);
 		}
-		
-		OAuthService service = new ServiceBuilder().provider(providerClass)
-				.apiKey(consumerKey).apiSecret(consumerSecret).callback(cbUrl)
-				.build();
-		
+
 		return service;
 	}
 	
-	public static void authenticateEvernote(RenderRequest renderRequest, PortletSession portletSession, ThemeDisplay themeDisplay) throws SystemException {
+	public static void authenticateEvernote(RenderRequest renderRequest, PortletSession portletSession, ThemeDisplay themeDisplay) 
+		throws SystemException {
+		
 		HttpServletRequest request = PortalUtil.getHttpServletRequest(renderRequest);
 		Boolean closeWindow = false;
 		String authorizationUrl = "";
-		try {
-			OAuthService service = getOAuthService(request, themeDisplay);
+		
+		OAuthService service = getOAuthService(request, themeDisplay);
 
-			if(PortalUtil.getOriginalServletRequest(request).getParameter("oauth_verifier") == null) {
-				// Send an OAuth message to the Provider asking for a new Request
-				// Token because we don't have access to the current user's account.
-				Token scribeRequestToken = service.getRequestToken();  
-				
-				portletSession.setAttribute(REQUEST_TOKEN, scribeRequestToken.getToken());
-				portletSession.setAttribute(REQUEST_TOKEN_SECRET, scribeRequestToken.getSecret());
-				
-				authorizationUrl = EVERNOTE_SERVICE.getAuthorizationUrl(scribeRequestToken.getToken());
-			}
-			else {
-				closeWindow = true;
-				// Send an OAuth message to the Provider asking to exchange the
-				// existing Request Token for an Access Token
-				Token scribeRequestToken = new Token(
-						portletSession.getAttribute(REQUEST_TOKEN).toString(), 
-						portletSession.getAttribute(REQUEST_TOKEN_SECRET).toString());
-				
-				Verifier scribeVerifier = new Verifier(
-						PortalUtil.getOriginalServletRequest(request).getParameter("oauth_verifier"));
-				
-				Token scribeAccessToken = service.getAccessToken(scribeRequestToken, scribeVerifier);
-				
-				EvernoteAuth evernoteAuth = EvernoteAuth.parseOAuthResponse(
-						EVERNOTE_SERVICE, scribeAccessToken.getRawResponse());
-				
-				portletSession.setAttribute(ACCESS_TOKEN, evernoteAuth.getToken());
-			}                 
+		if (PortalUtil.getOriginalServletRequest(request).getParameter(OAUTH_VERIFIER) == null) {
+			// Send an OAuth message to the Provider asking for a new Request
+			// Token because we don't have access to the current user's account.
+			Token scribeRequestToken = service.getRequestToken();  
+			 
+			portletSession.setAttribute(REQUEST_TOKEN, scribeRequestToken.getToken());
+			portletSession.setAttribute(REQUEST_TOKEN_SECRET, scribeRequestToken.getSecret());
 			
-			renderRequest.setAttribute("closeWindow", closeWindow);
-			renderRequest.setAttribute("authorizationUrl", authorizationUrl);   
-		} catch (SystemException e) {
-			LOG.error(e);
-			throw e;
-		}
+			authorizationUrl = EVERNOTE_SERVICE.getAuthorizationUrl(scribeRequestToken.getToken());
+			
+		} else {
+			closeWindow = true;
+			// Send an OAuth message to the Provider asking to exchange the
+			// existing Request Token for an Access Token
+			Token scribeRequestToken = new Token(
+					portletSession.getAttribute(REQUEST_TOKEN).toString(), 
+					portletSession.getAttribute(REQUEST_TOKEN_SECRET).toString());
+			
+			Verifier scribeVerifier = new Verifier(
+					PortalUtil.getOriginalServletRequest(request).getParameter(OAUTH_VERIFIER));
+			
+			Token scribeAccessToken = service.getAccessToken(scribeRequestToken, scribeVerifier);
+			
+			EvernoteAuth evernoteAuth = EvernoteAuth.parseOAuthResponse(
+					EVERNOTE_SERVICE, scribeAccessToken.getRawResponse());
+			
+			portletSession.setAttribute(ACCESS_TOKEN, evernoteAuth.getToken());
+		}                 
+		
+		renderRequest.setAttribute(CLOSE_WINDOW, closeWindow);
+		renderRequest.setAttribute(AUTHORIZATION_URL, authorizationUrl);   
 	}
 }

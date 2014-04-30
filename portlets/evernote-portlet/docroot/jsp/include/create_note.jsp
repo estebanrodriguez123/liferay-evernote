@@ -34,48 +34,48 @@
 	<portlet:param name="cmd" value="loadNotes"/>
 </portlet:resourceURL>	
 
-<a href="${backURL }"><button class="btn btn-primary" type="button"> &lt;&lt; Back</button></a>
+<a href="${backURL}"><button class="btn btn-primary" type="button"> &lt;&lt;&nbsp;<liferay-ui:message key="back"/></button></a>
 
-<div class="row-fluid">
-    <div class="span6">
-        <div id="note-create" class="evernote">
-            <portlet:actionURL var="createNoteURL" name="createNote"/>
-            <h3><i class="icon-file"></i>Create Note</h3>
-            <aui:form name="createNoteForm" action="${createNoteURL}" method="post"> 
-                <div class="notebook-selector-wrapper">
-                	<div class="notebook-selector"><aui:select name="newNoteNotebook"></aui:select></div>
-                	<div class="notebook-selector-loader"><img id="evernote-small-loader" src="${pageContext.request.contextPath}/images/ajax-loader.gif" /></div>
-                </div>
-                <div id="note-wrapper">
-                    <input type="text" name="${pns}newNoteTitle" placeholder="Title"/>
-                    <textarea name="${pns}newNoteContent" class="evernote-textarea" placeholder="Note content"></textarea>
-                </div>
-                <button class="btn btn-primary" type="submit">Create</button>
-            </aui:form>
-        </div>
-    </div>
-
-    <div class="span6">
-        <div id="notebook-create" class="evernote">
-            <portlet:actionURL var="createNotebookURL" name="createNotebook"/>
-            <h3><i class="icon-book"></i>Create Notebook</h3>
-            <aui:form name="createNotebookForm" action="${createNotebookURL}" method="post"> 
-                <aui:input type="text" name="newNotebookName" />
-                <button class="btn btn-primary" type="submit">Create</button>
-            </aui:form>
-        </div>
-    </div>
+<div id="${pns}create-note">
+	<div class="row-fluid">
+	    <div class="span6">
+	        <div id="note-create" class="evernote">
+	            <portlet:actionURL var="createNoteURL" name="createNote"/>
+	            <h3><i class="icon-file"></i><liferay-ui:message key="create-note"/></h3>
+	            <aui:form name="createNoteForm" action="${createNoteURL}" method="post"> 
+	                <div class="notebook-selector-wrapper">
+	                	<div class="notebook-selector"><aui:select name="newNoteNotebook"></aui:select></div>
+	                	<div class="notebook-selector-loader"><img id="evernote-small-loader" src="${pageContext.request.contextPath}/images/ajax-loader.gif" /></div>
+	                </div>
+	                <div id="note-wrapper">
+	                	<aui:input name="newNoteTitle" placeholder="title" label="" type="text"/>
+	                	<aui:input name="newNoteContent" placeholder="note-content" label="" type="textarea" cssClass="evernote-textarea"/>
+	                </div>
+	                <button class="btn btn-primary" type="submit"><liferay-ui:message key="create"/></button>
+	            </aui:form>
+	        </div>
+	    </div>
+	
+	    <div class="span6">
+	        <div id="notebook-create" class="evernote">
+	            <portlet:actionURL var="createNotebookURL" name="createNotebook"/>
+	            <h3><i class="icon-book"></i><liferay-ui:message key="create-notebook"/></h3>
+	            <aui:form name="createNotebookForm" action="${createNotebookURL}" method="post"> 
+	                <aui:input type="text" name="newNotebookName" label="" placeholder="new-notebook-name"/>
+	                <button class="btn btn-primary" type="submit"><liferay-ui:message key="create"/></button>
+	            </aui:form>
+	        </div>
+	    </div>
+	</div>
 </div>
-
 <script id="notebook-options" type="text/x-html-template">
 	{{#each notes}}
 		<option value="{{guid}}">{{name}}</option>
 	{{/each}}
 </script>
 
-<script>
-AUI().use('aui-io-request', 'handlebars', function(Y) {
-	Y.io.request('${loadNotesURL}', {
+<aui:script use="aui-io-request,handlebars">
+	A.io.request('${loadNotesURL}', {
 		method: 'GET',
 		data: {
 		},
@@ -87,20 +87,22 @@ AUI().use('aui-io-request', 'handlebars', function(Y) {
 		}
 	});	
 
+	/** render notebooks on select of Create Note */
 	function updateNotebooksList(data) {
-	    // render notebooks on select of Create Note
-	    var evalData = eval(data.notes.details[1].response);
-	    var notebooksCount = evalData.length;
-
-	    var html = "";
-	    for (var i=0;i<notebooksCount;i++) {
-	    	html += "<option value='" + evalData[i].guid + "'>" + evalData[i].name + "</option>";
-	    }
+	    var evalData = eval(data.notes.details[1].response),
+	    	container = A.one("#${pns}create-note"),
+	    	source = A.one("#notebook-options").getHTML(),
+	    	template = A.Handlebars.compile(source);
 	    
-	    Y.one("#evernote-small-loader").remove();
-	    Y.one("#${pns}newNoteNotebook").get('childNodes').remove();
-	    Y.one("#${pns}newNoteNotebook").append(html);
-	}
-}); 
+	    var notes = [];	
+	    for (var i = 0; i < evalData.length; ++i) {
+	    	notes.push({name: evalData[i].name, guid: evalData[i].guid});
+	    }
 
-</script>
+	    var html = template({notes: notes});
+	   
+	    container.one("#evernote-small-loader").remove();
+	    container.one("#${pns}newNoteNotebook").get('childNodes').remove();
+	    container.one("#${pns}newNoteNotebook").append(html);
+	}
+</aui:script>
