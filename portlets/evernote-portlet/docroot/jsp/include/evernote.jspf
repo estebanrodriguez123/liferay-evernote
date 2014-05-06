@@ -37,156 +37,58 @@
 	<portlet:param name="mvcPath" value="/jsp/include/create_note.jsp" />
 </portlet:renderURL>
 
+<div id="${pns}evernote-view">
 
-<div class="row-fluid">
-	<div class="evernote-page-title"><h3>Notebooks & Notes:</h3></div>
-	<div class="new-note-btn-wrapper"><a href="${createNote}"><button class="btn btn-primary" type="button">New Note</button></a></div>
-</div>
-<div class="row-fluid">
-    <div class="span4">
-        <div id="notes-list">
-        	<div  class="notebooks-list-wrapper">
-        		<img src="${pageContext.request.contextPath}/images/ajax-loader-big.gif" />
-        	</div>
-        </div>
-    </div>
-    
-    
-    <div class="span8">
-        <div id="note-content"  class="evernote">
-            <h4>Note preview:</h4>
-        
-            <div id="${pns}preview-frame-container" class="preview-iframe-container"></div>
-        
-            <aui:layout>
-                <aui:column>
-                    <aui:form name="deleteNoteForm" action="${deleteNoteURL}" method="post"> 
-                        <aui:input type="hidden" name="noteTitleDelete" />
-                        <aui:input type="hidden" name="noteGuidDelete" />
-                        <button class="btn" type="button" onclick="deleteNote()">Delete</button>
-                    </aui:form>
-                </aui:column>
-                <aui:column>
-                    <a id="${pns}editNoteURL" href="javascript:void(0);"><button class="btn">Edit in Evernote</button></a>
-                </aui:column>
-            </aui:layout>
-        </div>
-    
-    </div>
-</div>
-
-<script>
-	function deleteNote() {
-		AUI().ready('evernote-portlet', function(A) {
-		    var noteGuid = A.one("#${pns}noteGuidDelete").getAttribute("value");
-		    var noteTitle = A.one("#${pns}noteTitleDelete").getAttribute("value");
-		    if (noteGuid != null && noteGuid.length > 0) {
-		    	if (confirm('Are you sure to delete "' + noteTitle + '"?')) {
-			    	A.one("#${pns}deleteNoteForm").submit();
-		    	}
-		    } else {
-		    	alert("Please select a note to delete");
-		    }
-		});
-	}
-	
-	function loadMoreNotes(notebook){
-		var guid = notebook.getAttribute('id'),		
-			parentUL = notebook.parentNode,
-			countLI = 0;
-		
-		for (var i = 0; i < parentUL.childNodes.length; i++) {
-			if (parentUL.childNodes[i].nodeName == "LI") countLI++;
-		}
-				
- 		AUI().use('aui-io-request', function(Y) {
-			Y.io.request('${loadMoreNotesURL}', {
-				data: {
-					${pns}notebookGuid : guid,
-					${pns}countLI : countLI
-				},
-				dataType: 'json',
-				on: {
-					success: function() {
-						var loadMore = this.get('responseData').loadMore;
-						var noteList = this.get('responseData').noteList;
-						
-						var loadMoreLI = Y.one('#' + guid);
-						var noteListUL = loadMoreLI.ancestor();
-						
-						if(loadMore){
-							loadMoreLI = loadMoreLI.cloneNode(true);
-							Y.one('#' + guid).remove();
-						}
-						else{
-							loadMoreLI.remove();
-						}
-
-						for(var i = 0; i < noteList.length; i++){
-							var noteLi = Y.Lang.sub(
-									Y.one('#note-list-li').get('innerHTML'), 
-									noteList[i]);							
-							noteListUL.appendChild(noteLi);
-						} 
-						
-						if(loadMore) noteListUL.appendChild(loadMoreLI);
-		  			}
-				}
-			});	
-		}); 
-	}
-	
-	function toggle(obj) {
-		AUI().ready('evernote-portlet', function(A) {
-			var className = obj.getAttribute("class");
-			var target = obj.nextElementSibling;
-			if (className.indexOf("collapsed") != -1) {
-				A.one(obj).replaceClass("collapsed", "expanded");
-				A.one(target).show();
-			} else {
-				A.one(obj).replaceClass("expanded", "collapsed");
-				A.one(target).hide();
-			}
-		});
-	}
-	
-</script>
-
-<script id="note-list-li" type="text/x-html-template">
-	<li id="{guid}" class="note-item">{title}</li>
-</script>
-
-<script id="note-list-template" type="text/x-handlebars-template">
-	{{#each notes}}
-		<div class="notebook-wrapper">
-		{{#if noteList}}
-		<div class="notebook-header collapsed" onclick="toggle(this);">{{name}}</div>
-		{{else}}
-		<div class="notebook-header">{{name}}</div>
-		{{/if}}
-		<div class="notes-wrapper" style="display:none">
-		<ul>
-		{{#each noteList}}
-	    	<li class="note-item" id="{{guid}}">{{title}}</li>
-	    {{/each}}
-		{{#if loadMore}}
-			<li id="{{guid}}" onclick="loadMoreNotes(this);">load more...</li>
-		{{/if}}
-	    </ul>
+	<div class="row-fluid">
+		<div class="evernote-page-title"><h3><liferay-ui:message key="notebooks-and-notes"/></h3></div>
+		<div class="new-note-btn-wrapper">
+			<a href="${createNote}">
+				<button class="btn btn-primary" type="button"><liferay-ui:message key="create-note"/></button>
+			</a>
 		</div>
-		</div>
-    {{/each}}
-</script>
+	</div>
+	<div class="row-fluid">
+	    <div class="span4">
+	        <div id="notes-list">
+	        	<div  class="notebooks-list-wrapper">
+	        		<img class="ajax-loader" src="${pageContext.request.contextPath}/images/ajax-loader-big.gif" />
+	        	</div>
+	        </div>
+	    </div>
+	    
+	    <div class="span8">
+	        <div id="note-content"  class="evernote">
+	            <h4><liferay-ui:message key="note-preview"/></h4>
+	        
+	            <div id="${pns}preview-frame-container" class="preview-iframe-container">
+	            	<img class="ajax-loader" src="${pageContext.request.contextPath}/images/ajax-loader-big.gif" />
+	            </div>
+                <aui:form name="deleteNoteForm" action="${deleteNoteURL}" method="post"> 
+                    <aui:input type="hidden" name="noteTitleDelete" />
+                    <aui:input type="hidden" name="noteGuidDelete" />
+		        	<aui:button-row>
+                    	<aui:button name="deleteNote" value="delete"/>
+                    	<aui:button name="editNoteURL" value="edit-in-evernote" href="javascript:void(0);"/>
+        			</aui:button-row>
+                </aui:form>
+		    </div>
+	    
+	    </div>
+	</div>
+	<%@ include file="templates.jspf"%>
+</div>
 
-<script type="text/javascript">
-	AUI().ready('evernote-portlet', function(A) {
-	    var evernote = new A.Evernote({
+<aui:script use="evernote-portlet">
+ 	new A.Evernote(
+ 		{
 	        resourceUrl: '<portlet:resourceURL />',
 	        portletNamespace: '${pns}',
+	        contentBox: A.one("#${pns}evernote-view"),
 	        selectNoteURL: '${selectNoteURL}',
 	        loadMoreNotesURL: '${loadMoreNotesURL}',
 	        loadNotesURL: '${loadNotesURL}',
 	        deleteNoteURL: '${deleteNoteURL}'
-	    });
-	});
-</script> 
+	        
+    	}
+    );
+</aui:script>

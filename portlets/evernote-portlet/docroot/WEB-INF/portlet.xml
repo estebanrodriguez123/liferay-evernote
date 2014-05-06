@@ -14,6 +14,10 @@
 		    <value>/jsp/edit.jsp</value>
 		</init-param>
 		<init-param>
+			<name>create-note-jsp</name>
+			<value>/jsp/include/create_note.jsp</value>
+		</init-param>
+		<init-param>
             <name>check-auth-token</name>
             <value>false</value>
         </init-param>

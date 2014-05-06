@@ -21,14 +21,15 @@
 
 <%@ include file="/jsp/init.jsp"%>
 
-<liferay-ui:error exception="<%=SystemException.class %>"><liferay-ui:message key="system-exception" /></liferay-ui:error>
-<liferay-ui:error exception="<%=EDAMUserException.class %>"><liferay-ui:message key="evernote-error" /></liferay-ui:error>
-<liferay-ui:error exception="<%=EDAMSystemException.class %>"><liferay-ui:message key="evernote-error" /></liferay-ui:error>
-<liferay-ui:error exception="<%=TException.class %>"><liferay-ui:message key="evernote-error" /></liferay-ui:error>
-<liferay-ui:error exception="<%=EDAMNotFoundException.class %>"><liferay-ui:message key="evernote-error" /></liferay-ui:error>
-<liferay-ui:error exception="<%=NoNoteException.class %>"><liferay-ui:message key="no-note-selected" /></liferay-ui:error>
+<liferay-ui:error exception="<%=SystemException.class %>" message="system-error" />
+<liferay-ui:error exception="<%=EDAMUserException.class %>" message="evernote-error" />
+<liferay-ui:error exception="<%=EDAMSystemException.class %>" message="evernote-error" />
+<liferay-ui:error exception="<%=TException.class %>" message="evernote-error" />
+<liferay-ui:error exception="<%=EDAMNotFoundException.class %>" message="evernote-error" />
+<liferay-ui:error exception="<%=NoNoteException.class %>" message="no-note-selected" />
+<liferay-ui:error exception="<%=InvalidApiKeyException.class %>" message="invalid-api-key-error" />
 
-<c:if test="<%= themeDisplay.isSignedIn() %>">
+<c:if test="<%= themeDisplay.isSignedIn() && !SessionErrors.contains(renderRequest, InvalidApiKeyException.class) %>">
 	<c:choose>
 		<c:when test="${needAuthorize}">	
 			<%@ include file="/jsp/include/authorization.jspf" %>
@@ -38,4 +39,3 @@
 		</c:otherwise>
 	</c:choose>
 </c:if>
-

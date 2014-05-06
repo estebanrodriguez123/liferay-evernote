@@ -42,7 +42,7 @@ public class ConfigurationActionImpl extends DefaultConfigurationAction {
 	        
 	    PortletConfig selPortletConfig = getSelPortletConfig(renderRequest);
 		String configTemplate = selPortletConfig.getInitParameter(
-			"config-template");
+			CONFIG_TEMPLATE);
 		return configTemplate;
 	}
 	
@@ -55,6 +55,8 @@ public class ConfigurationActionImpl extends DefaultConfigurationAction {
     	prefs.setValue(NOTES_LOADED, ParamUtil.getString(actionRequest, NOTES_LOADED));
     	prefs.store();
         
-        SessionMessages.add(actionRequest, "success");
+        SessionMessages.add(actionRequest, SUCCESS_KEY);
     }
+    
+    public static final String CONFIG_TEMPLATE = "config-template";
 }

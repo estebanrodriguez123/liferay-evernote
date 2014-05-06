@@ -25,8 +25,9 @@ import com.liferay.portal.kernel.util.PrefsPropsUtil;
 import com.liferay.portal.kernel.util.PropsUtil;
 
 public class EvernoteKeys {
-	private static final String EVERNOTE_CONSUMER_KEY="evernote.consumnerKey";
-	private static final String EVERNOTE_CONSUMER_SECRET="evernote.consumerSecret";
+	
+	private static final String EVERNOTE_CONSUMER_KEY= "evernote.consumnerKey";
+	private static final String EVERNOTE_CONSUMER_SECRET= "evernote.consumerSecret";
 	
 	public static String getConsumerKey(long companyId) throws SystemException{
 		return PrefsPropsUtil.getString(companyId, EVERNOTE_CONSUMER_KEY, 

@@ -47,12 +47,10 @@
     padding: 5%;
     width: 90%;
 }
-#note-content img {
-    background: #FFF;
-    padding: 1em;
-    margin: 1em 0;
-    border-radius: 0.5em;
-    border: 1px solid #CCC;
+
+.ajax-loader {
+	display: block;
+	margin: 0 auto 10px auto;
 }
 
 #note-create i {
@@ -74,6 +72,11 @@
     outline: 0;
     box-shadow: none;
     background: #F5FAFF;
+}
+
+#note-wrapper .control-group {
+	padding: 0;
+	margin-bottom: 0;
 }
 
 #note-wrapper input {
@@ -123,9 +126,8 @@ iframe.note-preview {
 }
 
 .new-note-btn-wrapper {
-	float: left;
-    margin-left: 13px;
-    margin-top: 15px;
+	float: right;
+    margin: 15px 0 15px;
 }
 
 .notebook-selector-wrapper {
@@ -133,16 +135,14 @@ iframe.note-preview {
 }
 
 .notebook-selector {
-	float:left;
+	float: left;
 }
 
 .notebook-selector-loader {
-	float:left;
+	float: left;
 	margin-top: 28px;
 }
 
 .preview-iframe-container {
     margin-bottom: 20px;
 }
-
-

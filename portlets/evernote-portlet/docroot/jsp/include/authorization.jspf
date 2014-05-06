@@ -21,9 +21,9 @@
 
 <p><liferay-ui:message key="authorization-message" /></p>
 
-<a href='javascript:void(0);' onclick='return evernotePopup();'>Authorize</a>
+<a id="${pns}authorize-link" href='javascript:void(0);'><liferay-ui:message key="evernote-authorize"/></a>
 
-<script>
+<aui:script use="base">
 
 var ${pns}closeWindow = ${closeWindow};
 
@@ -32,14 +32,13 @@ if(${pns}closeWindow) {
 	window.close();
 } 
 
-function evernotePopup() {
-	authWindow = window.open(
+A.one("#${pns}authorize-link").on("click", function(e){
+	var authWindow = window.open(
 			'${authorizationUrl}',
-			'evernotePOPUP',
+			'evernotePopUp',
 			'height=600,width=600'
 			);	
 	if ( window.focus ) { authWindow.focus(); }
-	return false;
-}
+});
 
-</script>
+</aui:script>
