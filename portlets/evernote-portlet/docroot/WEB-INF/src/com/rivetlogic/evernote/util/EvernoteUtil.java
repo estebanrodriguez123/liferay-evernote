@@ -24,7 +24,6 @@ import static com.rivetlogic.evernote.util.EvernoteConstants.REQUEST_TOKEN_SECRE
 import static com.rivetlogic.evernote.util.EvernoteConstants.INVALID_API_KEY_ERROR;
 import static com.rivetlogic.evernote.util.EvernoteConstants.OAUTH_VERIFIER;
 import static com.rivetlogic.evernote.util.EvernoteConstants.AUTHORIZATION_URL;
-import static com.rivetlogic.evernote.util.EvernoteConstants.CLOSE_WINDOW;
 
 import javax.portlet.PortletSession;
 import javax.portlet.RenderRequest;
@@ -41,6 +40,7 @@ import com.evernote.auth.EvernoteService;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
 import com.rivetlogic.evernote.exception.InvalidApiKeyException;
@@ -57,8 +57,8 @@ public class EvernoteUtil {
 		throws SystemException, InvalidApiKeyException {
 		
 		OAuthService service = null;
-		String consumerKey = ""; 
-		String consumerSecret = "";
+		String consumerKey = StringPool.BLANK; 
+		String consumerSecret = StringPool.BLANK;
 
 		// Set up the Scribe OAuthService.
 	    String cbUrl = PortalUtil.getCurrentCompleteURL(request);
@@ -89,8 +89,7 @@ public class EvernoteUtil {
 		throws SystemException {
 		
 		HttpServletRequest request = PortalUtil.getHttpServletRequest(renderRequest);
-		Boolean closeWindow = false;
-		String authorizationUrl = "";
+		String authorizationUrl = StringPool.BLANK;
 		
 		OAuthService service = getOAuthService(request, themeDisplay);
 
@@ -105,7 +104,6 @@ public class EvernoteUtil {
 			authorizationUrl = EVERNOTE_SERVICE.getAuthorizationUrl(scribeRequestToken.getToken());
 			
 		} else {
-			closeWindow = true;
 			// Send an OAuth message to the Provider asking to exchange the
 			// existing Request Token for an Access Token
 			Token scribeRequestToken = new Token(
@@ -123,7 +121,6 @@ public class EvernoteUtil {
 			portletSession.setAttribute(ACCESS_TOKEN, evernoteAuth.getToken());
 		}                 
 		
-		renderRequest.setAttribute(CLOSE_WINDOW, closeWindow);
 		renderRequest.setAttribute(AUTHORIZATION_URL, authorizationUrl);   
 	}
 }

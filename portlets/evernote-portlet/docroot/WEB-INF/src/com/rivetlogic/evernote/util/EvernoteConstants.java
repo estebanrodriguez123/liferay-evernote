@@ -58,7 +58,6 @@ public final class EvernoteConstants {
 	public static final String LOAD_MORE = "loadMore";
 	public static final String COUNT_LIST = "countLI";
 	public static final String OAUTH_VERIFIER = "oauth_verifier";
-	public static final String CLOSE_WINDOW = "closeWindow";
 	
 	public static final String JSP_PAGE = "jspPage";
 	public static final String GUID_SUCCESSFULL_CREATED_MESSAGE = "Successfully created a new notebook with GUID: ";

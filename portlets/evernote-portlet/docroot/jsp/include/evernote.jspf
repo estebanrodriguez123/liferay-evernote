@@ -68,7 +68,9 @@
                     <aui:input type="hidden" name="noteGuidDelete" />
 		        	<aui:button-row>
                     	<aui:button name="deleteNote" value="delete"/>
-                    	<aui:button name="editNoteURL" value="edit-in-evernote" href="javascript:void(0);"/>
+                    	<aui:a id="editNoteURL" href="javascript:void(0);" target="_blank" cssClass="btn">
+                    		<liferay-ui:message key="edit-in-evernote"/>
+                    	</aui:a>
         			</aui:button-row>
                 </aui:form>
 		    </div>

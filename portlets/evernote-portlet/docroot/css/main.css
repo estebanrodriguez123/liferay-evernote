@@ -1,5 +1,9 @@
 @import url(main-responsive.css);
 
+.aui a.btn {
+	font-weight: normal;
+}
+
 .evernote {
     border: solid 1px #DDD;
     background: #EAEAEA;
@@ -44,7 +48,7 @@
     border: 1px solid #DDD;
     float: left;
     margin: 0;
-    padding: 5%;
+    padding: 5% 5% 0 5%;
     width: 90%;
 }
 
