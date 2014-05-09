@@ -23,22 +23,27 @@
 
 <a id="${pns}authorize-link" href='javascript:void(0);'><liferay-ui:message key="evernote-authorize"/></a>
 
-<aui:script use="base">
+<aui:script use="event-base">
+	
+	//detects when a child pop up is rendered, 
+	//then close it and reloads the parent page
+	
+	if (window.opener) {
+		window.opener.location.reload(true);
+		window.close();
+	}
 
-var ${pns}closeWindow = ${closeWindow};
-
-if(${pns}closeWindow) {
-	window.opener.location.reload(true);
-	window.close();
-} 
-
-A.one("#${pns}authorize-link").on("click", function(e){
-	var authWindow = window.open(
-			'${authorizationUrl}',
-			'evernotePopUp',
-			'height=600,width=600'
-			);	
-	if ( window.focus ) { authWindow.focus(); }
-});
+	A.on("domready", function(){
+		
+		
+		A.one("#${pns}authorize-link").on("click", function(e){
+			var authWindow = window.open(
+					'${authorizationUrl}',
+					'evernotePopUp',
+					'height=600,width=600'
+					);	
+			if ( window.focus ) { authWindow.focus(); }
+		});
+	});
 
 </aui:script>

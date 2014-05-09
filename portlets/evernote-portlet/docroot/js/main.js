@@ -100,8 +100,7 @@ AUI.add('evernote-portlet', function (Y, NAME) {
 				pns = this.get('portletNamespace');
 
         	this.get('frame').set('content', noteContent);
-			Y.one('#' + pns + 'editNoteURL').setAttribute('href', editNoteURL);
-			Y.one('#' + pns + 'editNoteURL').setAttribute('target', '_blank');
+        	Y.one("#"+pns+"editNoteURL").setAttribute('href', editNoteURL);
 			Y.one('#' + pns + 'noteGuidDelete').setAttribute("value", data.guid);
         },
 
