@@ -63,7 +63,7 @@ public final class EvernoteConstants {
 	public static final String GUID_SUCCESSFULL_CREATED_MESSAGE = "Successfully created a new notebook with GUID: ";
 	public static final String GUID_SUCCESSFULL_DELETED_MESSAGE = "Successfully deleted note with the GUID: ";
 	public static final String JSON_RETURNING_ERROR = "Error while returning json";
-	public static final String INVALID_API_KEY_ERROR = "Invalid Api key";
+	public static final String EVERNOTE_AUTHENTICATION_ERROR = "Cannot Authenticate to Evernote";
 	
 	public static final String CREATE_NOTE_JSP = "create-note-jsp";
 	

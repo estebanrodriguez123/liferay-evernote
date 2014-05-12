@@ -34,7 +34,7 @@
 <%@page import="com.evernote.edam.error.EDAMUserException"%>
 
 <%@page import="com.rivetlogic.evernote.exception.NoNoteException"%>
-<%@page import="com.rivetlogic.evernote.exception.InvalidApiKeyException"%>
+<%@page import="com.liferay.portal.kernel.oauth.OAuthException"%>
 
 <portlet:defineObjects />
 <liferay-theme:defineObjects />

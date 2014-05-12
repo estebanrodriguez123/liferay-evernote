@@ -27,9 +27,9 @@
 <liferay-ui:error exception="<%=TException.class %>" message="evernote-error" />
 <liferay-ui:error exception="<%=EDAMNotFoundException.class %>" message="evernote-error" />
 <liferay-ui:error exception="<%=NoNoteException.class %>" message="no-note-selected" />
-<liferay-ui:error exception="<%=InvalidApiKeyException.class %>" message="invalid-api-key-error" />
+<liferay-ui:error exception="<%=OAuthException.class %>" message="evernote-authentication-error" />
 
-<c:if test="<%= themeDisplay.isSignedIn() && !SessionErrors.contains(renderRequest, InvalidApiKeyException.class) %>">
+<c:if test="<%= themeDisplay.isSignedIn() && !SessionErrors.contains(renderRequest, OAuthException.class) %>">
 	<c:choose>
 		<c:when test="${needAuthorize}">	
 			<%@ include file="/jsp/include/authorization.jspf" %>

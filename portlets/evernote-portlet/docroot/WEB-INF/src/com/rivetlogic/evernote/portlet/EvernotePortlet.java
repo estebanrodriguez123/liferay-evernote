@@ -45,6 +45,7 @@ import static com.rivetlogic.evernote.util.EvernoteConstants.NEW_NOTEBOOK_NAME;
 import static com.rivetlogic.evernote.util.EvernoteConstants.NOTE_GUID_DELETE;
 import static com.rivetlogic.evernote.util.EvernoteConstants.GUID_SUCCESSFULL_DELETED_MESSAGE;
 import static com.rivetlogic.evernote.util.EvernoteConstants.JSON_RETURNING_ERROR;
+import static com.rivetlogic.evernote.util.EvernoteConstants.EVERNOTE_AUTHENTICATION_ERROR;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -74,12 +75,12 @@ import com.evernote.edam.type.Note;
 import com.evernote.edam.type.NoteSortOrder;
 import com.evernote.edam.type.Notebook;
 import com.evernote.thrift.TException;
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.oauth.OAuthException;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.util.Constants;
@@ -90,7 +91,6 @@ import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.util.bridges.mvc.MVCPortlet;
-import com.rivetlogic.evernote.exception.InvalidApiKeyException;
 import com.rivetlogic.evernote.exception.NoNoteException;
 import com.rivetlogic.evernote.util.EvernoteUtil;
 
@@ -117,19 +117,19 @@ public class EvernotePortlet extends MVCPortlet {
 				try {
 					EvernoteUtil.authenticateEvernote(renderRequest,
 							portletSession, themeDisplay);
-				} catch (SystemException e) {
-					if (e instanceof InvalidApiKeyException) {
-						if (SessionErrors.isEmpty(renderRequest)) {
-							SessionMessages.add(renderRequest, 
-								renderRequest.getAttribute(WebKeys.PORTLET_ID) + 
-								SessionMessages.KEY_SUFFIX_HIDE_DEFAULT_ERROR_MESSAGE);
-						}
-						SessionErrors.add(renderRequest, InvalidApiKeyException.class);
-						
-					} else {
-						LOG.error(e);
-						SessionErrors.add(renderRequest, SystemException.class);
+				} catch (OAuthException e) {
+					
+					if (LOG.isDebugEnabled()) {
+						LOG.error(EVERNOTE_AUTHENTICATION_ERROR, e);
+					} 
+					
+					if (SessionErrors.isEmpty(renderRequest)) {
+						SessionMessages.add(renderRequest, 
+							renderRequest.getAttribute(WebKeys.PORTLET_ID) + 
+							SessionMessages.KEY_SUFFIX_HIDE_DEFAULT_ERROR_MESSAGE);
 					}
+					
+					SessionErrors.add(renderRequest, OAuthException.class);
 				}
 			}
 		}
