@@ -21,14 +21,27 @@
 
 <%@ include file="/jsp/init.jsp"%>
 
-<liferay-ui:error exception="<%=EDAMUserException.class %>"><liferay-ui:message key="evernote-error" /></liferay-ui:error>
-<liferay-ui:error exception="<%=EDAMSystemException.class %>"><liferay-ui:message key="evernote-error" /></liferay-ui:error>
-<liferay-ui:error exception="<%=TException.class %>"><liferay-ui:message key="evernote-error" /></liferay-ui:error>
-<liferay-ui:error exception="<%=EDAMNotFoundException.class %>"><liferay-ui:message key="evernote-error" /></liferay-ui:error>
+<liferay-ui:error exception="<%=EDAMUserException.class %>" message="evernote-error" />
+<liferay-ui:error exception="<%=EDAMSystemException.class %>" message="evernote-error" />
+<liferay-ui:error exception="<%=TException.class %>" message="evernote-error" />
+<liferay-ui:error exception="<%=EDAMNotFoundException.class %>" message="evernote-error" />
+<liferay-ui:error key="notebook-empty-error" message="notebook-empty-error"/>
 
 <portlet:renderURL var="backURL">
 	<portlet:param name="mvcPath" value="/jsp/view.jsp" />
 </portlet:renderURL>
+
+<portlet:renderURL var="currentURL">
+	<portlet:param name="mvcPath" value="/jsp/include/create_note.jsp" />
+</portlet:renderURL>
+
+<portlet:actionURL var="createNoteURL" name="createNote">
+	<portlet:param name="redirect" value="${backURL}"/>
+</portlet:actionURL>
+
+<portlet:actionURL var="createNotebookURL" name="createNotebook">
+	<portlet:param name="redirect" value="${currentURL}"/>
+</portlet:actionURL>
 
 <portlet:resourceURL var="loadNotesURL">
 	<portlet:param name="cmd" value="loadNotes"/>
@@ -40,29 +53,31 @@
 	<div class="row-fluid">
 	    <div class="span6">
 	        <div id="note-create" class="evernote">
-	            <portlet:actionURL var="createNoteURL" name="createNote"/>
 	            <h3><i class="icon-file"></i><liferay-ui:message key="create-note"/></h3>
 	            <aui:form name="createNoteForm" action="${createNoteURL}" method="post"> 
 	                <div class="notebook-selector-wrapper">
-	                	<div class="notebook-selector"><aui:select name="newNoteNotebook"></aui:select></div>
+	                	<div class="notebook-selector">
+	                		<aui:select name="newNoteNotebook">
+	                			<aui:option label="default-notebook" value=""/>
+	                		</aui:select>
+	                	</div>
 	                	<div class="notebook-selector-loader"><img id="evernote-small-loader" src="${pageContext.request.contextPath}/images/ajax-loader.gif" /></div>
 	                </div>
 	                <div id="note-wrapper">
 	                	<aui:input name="newNoteTitle" placeholder="title" label="" type="text"/>
 	                	<aui:input name="newNoteContent" placeholder="note-content" label="" type="textarea" cssClass="evernote-textarea"/>
 	                </div>
-	                <button class="btn btn-primary" type="submit"><liferay-ui:message key="create"/></button>
+	                <aui:button name="createNote" value="create" type="submit" cssClass="btn-primary"/>
 	            </aui:form>
 	        </div>
 	    </div>
 	
 	    <div class="span6">
 	        <div id="notebook-create" class="evernote">
-	            <portlet:actionURL var="createNotebookURL" name="createNotebook"/>
 	            <h3><i class="icon-book"></i><liferay-ui:message key="create-notebook"/></h3>
 	            <aui:form name="createNotebookForm" action="${createNotebookURL}" method="post"> 
 	                <aui:input type="text" name="newNotebookName" label="" placeholder="new-notebook-name"/>
-	                <button class="btn btn-primary" type="submit"><liferay-ui:message key="create"/></button>
+	                <aui:button name="createNotebook" value="create" type="submit" cssClass="btn-primary"/>
 	            </aui:form>
 	        </div>
 	    </div>
@@ -102,7 +117,32 @@
 	    var html = template({notes: notes});
 	   
 	    container.one("#evernote-small-loader").remove();
-	    container.one("#${pns}newNoteNotebook").get('childNodes').remove();
 	    container.one("#${pns}newNoteNotebook").append(html);
 	}
+	
+	A.one("#${pns}createNoteForm").on("submit", function(e){
+		e.halt();
+		var form = e.target,
+			title = A.Lang.trim(form.one("#${pns}newNoteTitle").get("value")),
+			text = A.Lang.trim(form.one("#${pns}newNoteContent").get("value"));
+		if (!title && !text)  {
+			if (confirm(Liferay.Language.get("empty-note-alert"))){
+				form.submit();
+			}
+		} else {
+			form.submit()
+		} 
+	});
+	
+	A.one("#${pns}createNotebookForm").on("submit", function(e){
+		e.halt();
+		var form = e.target,
+			value = A.Lang.trim(form.one("#${pns}newNotebookName").get("value"));
+		
+		if (value) {
+			form.submit();
+		} else {
+			alert(Liferay.Language.get("create-notebook-alert"));
+		}
+	});
 </aui:script>

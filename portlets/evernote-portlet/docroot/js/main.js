@@ -143,6 +143,20 @@ AUI.add('evernote-portlet', function (Y, NAME) {
         	});
         },
         
+        editNoteListener: function(){
+        	var instance = this,
+        		container = this.get("contentBox"),
+        		pns = this.get("portletNamespace"),
+        		editNoteButton = container.one("#"+pns+"editNoteURL");
+        	
+        	editNoteButton.on("click", function(e){
+        		if (e.target.getAttribute("href") == "#") {
+        			e.preventDefault();
+        			alert(Liferay.Language.get("edit-note-alert"));
+        		} 
+        	});
+        },
+        
         loadMoreNotes: function(){
         	var instance = this,
         		container = instance.get("contentBox"),
@@ -227,6 +241,7 @@ AUI.add('evernote-portlet', function (Y, NAME) {
             this.loadNotes();
             this.listenerNotes();
             this.deleteNoteListener();
+            this.editNoteListener();
             this.loadMoreNotes();
             this.toggleNotebookListener();
         },

@@ -49,6 +49,7 @@ public final class EvernoteConstants {
 	public static final String NEW_NOTE_NOTEBOOK = "newNoteNotebook";
 	public static final String NEW_NOTEBOOK_NAME = "newNotebookName";
 	public static final String NEW_NOTE_TITLE = "newNoteTitle";
+	public static final String UNTITLED_NOTE_KEY = "untitled-note";
 	public static final String NOTE_GUID_DELETE = "noteGuidDelete";
 	
 	public static final String LOAD_NOTES_ACTION = "loadNotes";
@@ -59,11 +60,12 @@ public final class EvernoteConstants {
 	public static final String COUNT_LIST = "countLI";
 	public static final String OAUTH_VERIFIER = "oauth_verifier";
 	
-	public static final String JSP_PAGE = "jspPage";
+	public static final String MVC_PATH = "mvcPath";
 	public static final String GUID_SUCCESSFULL_CREATED_MESSAGE = "Successfully created a new notebook with GUID: ";
 	public static final String GUID_SUCCESSFULL_DELETED_MESSAGE = "Successfully deleted note with the GUID: ";
 	public static final String JSON_RETURNING_ERROR = "Error while returning json";
 	public static final String EVERNOTE_AUTHENTICATION_ERROR = "Cannot Authenticate to Evernote";
+	public static final String NOTEBOOK_EMPTY_ERROR = "notebook-empty-error";
 	
 	public static final String CREATE_NOTE_JSP = "create-note-jsp";
 	
