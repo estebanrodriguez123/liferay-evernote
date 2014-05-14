@@ -18,7 +18,7 @@
 package com.rivetlogic.evernote.portlet;
 
 import static com.rivetlogic.evernote.util.EvernoteConstants.ACCESS_TOKEN;
-import static com.rivetlogic.evernote.util.EvernoteConstants.JSP_PAGE;
+import static com.rivetlogic.evernote.util.EvernoteConstants.MVC_PATH;
 import static com.rivetlogic.evernote.util.EvernoteConstants.CREATE_NOTE_JSP;
 import static com.rivetlogic.evernote.util.EvernoteConstants.NEED_AUTHORIZE;
 import static com.rivetlogic.evernote.util.EvernoteConstants.LOAD_NOTES_ACTION;
@@ -39,6 +39,7 @@ import static com.rivetlogic.evernote.util.EvernoteConstants.EVERNOTE_SERVICE_NO
 import static com.rivetlogic.evernote.util.EvernoteConstants.NOTE_CONTENT;
 import static com.rivetlogic.evernote.util.EvernoteConstants.EDIT_NOTE_URL;
 import static com.rivetlogic.evernote.util.EvernoteConstants.NEW_NOTE_TITLE;
+import static com.rivetlogic.evernote.util.EvernoteConstants.UNTITLED_NOTE_KEY;
 import static com.rivetlogic.evernote.util.EvernoteConstants.GUID_SUCCESSFULL_CREATED_MESSAGE;
 import static com.rivetlogic.evernote.util.EvernoteConstants.NEW_NOTE_NOTEBOOK;
 import static com.rivetlogic.evernote.util.EvernoteConstants.NEW_NOTEBOOK_NAME;
@@ -46,23 +47,21 @@ import static com.rivetlogic.evernote.util.EvernoteConstants.NOTE_GUID_DELETE;
 import static com.rivetlogic.evernote.util.EvernoteConstants.GUID_SUCCESSFULL_DELETED_MESSAGE;
 import static com.rivetlogic.evernote.util.EvernoteConstants.JSON_RETURNING_ERROR;
 import static com.rivetlogic.evernote.util.EvernoteConstants.EVERNOTE_AUTHENTICATION_ERROR;
+import static com.rivetlogic.evernote.util.EvernoteConstants.NOTEBOOK_EMPTY_ERROR;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.List;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.PortletException;
 import javax.portlet.PortletPreferences;
-import javax.portlet.PortletResponse;
 import javax.portlet.PortletSession;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import com.evernote.auth.EvernoteAuth;
 import com.evernote.clients.ClientFactory;
@@ -78,6 +77,7 @@ import com.evernote.thrift.TException;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.oauth.OAuthException;
@@ -99,23 +99,23 @@ public class EvernotePortlet extends MVCPortlet {
 	private static final Log LOG = LogFactoryUtil.getLog(EvernotePortlet.class);
 
 	@Override
-	public void doView(RenderRequest renderRequest,
-			RenderResponse renderResponse) throws PortletException, IOException {
-		PortletSession portletSession = renderRequest.getPortletSession();
+	public void doView(RenderRequest request,RenderResponse response) 
+		throws PortletException, IOException {
+		
+		PortletSession portletSession = request.getPortletSession();
 
-		HttpServletRequest request = PortalUtil
-				.getHttpServletRequest(renderRequest);
 		ThemeDisplay themeDisplay = (ThemeDisplay) request
 				.getAttribute(WebKeys.THEME_DISPLAY);
+		
 		if (themeDisplay.isSignedIn()) {
 			if (((String) portletSession.getAttribute(ACCESS_TOKEN)) != null) {
-				renderRequest.setAttribute(ACCESS_TOKEN,
+				request.setAttribute(ACCESS_TOKEN,
 						(String) portletSession.getAttribute(ACCESS_TOKEN));
-				renderRequest.setAttribute(NEED_AUTHORIZE, Boolean.FALSE);
+				request.setAttribute(NEED_AUTHORIZE, Boolean.FALSE);
 			} else {
-				renderRequest.setAttribute(NEED_AUTHORIZE, Boolean.TRUE);
+				request.setAttribute(NEED_AUTHORIZE, Boolean.TRUE);
 				try {
-					EvernoteUtil.authenticateEvernote(renderRequest,
+					EvernoteUtil.authenticateEvernote(request,
 							portletSession, themeDisplay);
 				} catch (OAuthException e) {
 					
@@ -123,49 +123,51 @@ public class EvernotePortlet extends MVCPortlet {
 						LOG.error(EVERNOTE_AUTHENTICATION_ERROR, e);
 					} 
 					
-					if (SessionErrors.isEmpty(renderRequest)) {
-						SessionMessages.add(renderRequest, 
-							renderRequest.getAttribute(WebKeys.PORTLET_ID) + 
+					if (SessionErrors.isEmpty(request)) {
+						SessionMessages.add(request, 
+							request.getAttribute(WebKeys.PORTLET_ID) + 
 							SessionMessages.KEY_SUFFIX_HIDE_DEFAULT_ERROR_MESSAGE);
 					}
 					
-					SessionErrors.add(renderRequest, OAuthException.class);
+					SessionErrors.add(request, OAuthException.class);
 				}
 			}
 		}
 		
-		super.doView(renderRequest, renderResponse);
+		super.doView(request, response);
 	}
 
 	@Override
 	public void serveResource(ResourceRequest request, ResourceResponse response) {
 
 		String cmd = ParamUtil.getString(request, Constants.CMD);
-
-		if (LOAD_NOTES_ACTION.equals(cmd)) {
-			JSONArray resultJsonArray = JSONFactoryUtil.createJSONArray();
-			resultJsonArray = loadNotes(request);
-			returnJSON(response, resultJsonArray);
-		}
-
-		else {
-			JSONObject resultJsonObject = JSONFactoryUtil.createJSONObject();
-			if (LOAD_MORE_NOTES_ACTION.equals(cmd)) {
-				resultJsonObject = loadMoreNotes(request);
-			} else if (SELECT_NOTE_ACTION.equals(cmd)) {
-				resultJsonObject = selectNote(request);
+		
+		try {
+			if (LOAD_NOTES_ACTION.equals(cmd)) {
+				JSONArray resultJsonArray = JSONFactoryUtil.createJSONArray();
+				resultJsonArray = loadNotes(request);
+				writeJSON(request, response, resultJsonArray);
+			} else {
+				
+				JSONObject resultJsonObject = JSONFactoryUtil.createJSONObject();
+				if (LOAD_MORE_NOTES_ACTION.equals(cmd)) {
+					resultJsonObject = loadMoreNotes(request);
+				} else if (SELECT_NOTE_ACTION.equals(cmd)) {
+					resultJsonObject = selectNote(request);
+				}
+				writeJSON(request, response, resultJsonObject);
 			}
-			returnJSON(response, resultJsonObject);
+				
+		} catch (IOException e) {
+			LOG.error(JSON_RETURNING_ERROR, e);
 		}
 
 	}
 
-	public JSONArray loadNotes(ResourceRequest resourceRequest) {
-		HttpServletRequest request = PortalUtil
-				.getHttpServletRequest(resourceRequest);
+	public JSONArray loadNotes(ResourceRequest request) {
 
-		PortletSession portletSession = resourceRequest.getPortletSession();
-		PortletPreferences prefs = resourceRequest.getPreferences();
+		PortletSession portletSession = request.getPortletSession();
+		PortletPreferences prefs = request.getPreferences();
 		String accessToken = (String) portletSession.getAttribute(ACCESS_TOKEN);
 		int notesLoaded = GetterUtil.getInteger(prefs.getValue(NOTES_LOADED,
 				NOTES_LOADED_DEFAULT_VALUE));
@@ -225,21 +227,19 @@ public class EvernotePortlet extends MVCPortlet {
 		return jsonArray;
 	}
 
-	public JSONObject loadMoreNotes(ResourceRequest resourceRequest) {
-		HttpServletRequest request = PortalUtil
-				.getHttpServletRequest(resourceRequest);
+	public JSONObject loadMoreNotes(ResourceRequest request) {
 
-		PortletSession portletSession = resourceRequest.getPortletSession();
-		PortletPreferences prefs = resourceRequest.getPreferences();
+		PortletSession portletSession = request.getPortletSession();
+		PortletPreferences prefs = request.getPreferences();
 		String accessToken = (String) portletSession.getAttribute(ACCESS_TOKEN);
 		int notesLoaded = GetterUtil.getInteger(prefs.getValue(NOTES_LOADED,
 				NOTES_LOADED_DEFAULT_VALUE));
 
 		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
 
-		String notebookGuid = ParamUtil.getString(resourceRequest,
+		String notebookGuid = ParamUtil.getString(request,
 			NOTEBOOK_GUID);
-		Integer currentNotes = ParamUtil.getInteger(resourceRequest, COUNT_LIST) - 1;
+		Integer currentNotes = ParamUtil.getInteger(request, COUNT_LIST) - 1;
 
 		EvernoteAuth evernoteAuth = new EvernoteAuth(EVERNOTE_SERVICE,
 				accessToken);
@@ -302,6 +302,7 @@ public class EvernotePortlet extends MVCPortlet {
 		EvernoteAuth evernoteAuth = new EvernoteAuth(EVERNOTE_SERVICE,
 				accessToken);
 		NoteStoreClient noteStoreClient;
+		
 		try {
 			noteStoreClient = new ClientFactory(evernoteAuth)
 					.createNoteStoreClient();
@@ -314,6 +315,7 @@ public class EvernotePortlet extends MVCPortlet {
 			jsonObject.put(NOTE_CONTENT, note.getContent());
 			jsonObject.put(GUID, noteGuid);
 			jsonObject.put(EDIT_NOTE_URL, editNoteURL);
+			
 		} catch (EDAMUserException e) {
 			LOG.error(e);
 			SessionErrors.add(request, EDAMUserException.class);
@@ -333,11 +335,10 @@ public class EvernotePortlet extends MVCPortlet {
 
 	public void createNote(ActionRequest actionRequest,
 			ActionResponse actionResponse) throws IOException, PortletException {
-		HttpServletRequest request = PortalUtil
-				.getHttpServletRequest(actionRequest);
 
 		PortletSession portletSession = actionRequest.getPortletSession();
 		String accessToken = (String) portletSession.getAttribute(ACCESS_TOKEN);
+		ThemeDisplay themeDisplay = (ThemeDisplay) actionRequest.getAttribute(WebKeys.THEME_DISPLAY);
 
 		EvernoteAuth evernoteAuth = new EvernoteAuth(EVERNOTE_SERVICE,
 				accessToken);
@@ -351,6 +352,10 @@ public class EvernotePortlet extends MVCPortlet {
 			Note note = new Note();
 
 			String title = ParamUtil.getString(actionRequest, NEW_NOTE_TITLE);
+			
+			if (Validator.isNull(title)) {
+				title = LanguageUtil.get(themeDisplay.getLocale(), UNTITLED_NOTE_KEY);
+			}
 
 			// The content of an Evernote note is represented using Evernote
 			// Markup Language
@@ -384,75 +389,79 @@ public class EvernotePortlet extends MVCPortlet {
 				LOG.debug(GUID_SUCCESSFULL_CREATED_MESSAGE + newNoteGuid);
 			}
 
-			actionResponse.setRenderParameter(JSP_PAGE, viewTemplate);
 		} catch (EDAMUserException e) {
 			LOG.error(e);
-			SessionErrors.add(request, EDAMUserException.class);
+			SessionErrors.add(actionRequest, EDAMUserException.class);
 		} catch (EDAMSystemException e) {
 			LOG.error(e);
-			SessionErrors.add(request, EDAMSystemException.class);
+			SessionErrors.add(actionRequest, EDAMSystemException.class);
 		} catch (TException e) {
 			LOG.error(e);
-			SessionErrors.add(request, TException.class);
+			SessionErrors.add(actionRequest, TException.class);
 		} catch (EDAMNotFoundException e) {
 			LOG.error(e);
-			SessionErrors.add(request, EDAMNotFoundException.class);
+			SessionErrors.add(actionRequest, EDAMNotFoundException.class);
 		}
-		if (!SessionErrors.isEmpty(request)) {
-			actionResponse.setRenderParameter(JSP_PAGE, getInitParameter(CREATE_NOTE_JSP));
+		if (!SessionErrors.isEmpty(actionRequest)) {
+			actionResponse.setRenderParameter(MVC_PATH, getInitParameter(CREATE_NOTE_JSP));
 		}
 
 	}
 
-	public void createNotebook(ActionRequest actionRequest,
-			ActionResponse actionResponse) throws IOException, PortletException {
-		HttpServletRequest request = PortalUtil
-				.getHttpServletRequest(actionRequest);
+	public void createNotebook(ActionRequest request,
+			ActionResponse response) throws IOException, PortletException {
 
-		PortletSession portletSession = actionRequest.getPortletSession();
+		PortletSession portletSession = request.getPortletSession();
 		String accessToken = (String) portletSession.getAttribute(ACCESS_TOKEN);
 
 		EvernoteAuth evernoteAuth = new EvernoteAuth(EVERNOTE_SERVICE,
 				accessToken);
 		NoteStoreClient noteStoreClient;
-		try {
-			noteStoreClient = new ClientFactory(evernoteAuth)
-					.createNoteStoreClient();
-			String name = ParamUtil.getString(actionRequest, NEW_NOTEBOOK_NAME);
-
-			// To create a new note, simply create a new Note object and fill in
-			// attributes such as the note's title.
-			Notebook notebook = new Notebook();
-			notebook.setName(name);
-
-			Notebook createdNotebook = noteStoreClient.createNotebook(notebook);
-			String newNotebookGuid = createdNotebook.getGuid();
-			
-			if (LOG.isDebugEnabled()) {
-				LOG.debug(GUID_SUCCESSFULL_CREATED_MESSAGE
-					+ newNotebookGuid);
+		String name = ParamUtil.getString(request, NEW_NOTEBOOK_NAME);
+		
+		if (Validator.isNotNull(name)) {
+			try {
+				noteStoreClient = new ClientFactory(evernoteAuth)
+				.createNoteStoreClient();
+				
+				// To create a new note, simply create a new Note object and fill in
+				// attributes such as the note's title.
+				Notebook notebook = new Notebook();
+				notebook.setName(name);
+				
+				Notebook createdNotebook = noteStoreClient.createNotebook(notebook);
+				String newNotebookGuid = createdNotebook.getGuid();
+				
+				if (LOG.isDebugEnabled()) {
+					LOG.debug(GUID_SUCCESSFULL_CREATED_MESSAGE
+						+ newNotebookGuid);
+				}
+				
+			} catch (EDAMUserException e) {
+				LOG.error(e);
+				SessionErrors.add(request, EDAMUserException.class);
+			} catch (EDAMSystemException e) {
+				LOG.error(e);
+				SessionErrors.add(request, EDAMSystemException.class);
+			} catch (TException e) {
+				LOG.error(e);
+				SessionErrors.add(request, TException.class);
 			}
 			
-		} catch (EDAMUserException e) {
-			LOG.error(e);
-			SessionErrors.add(request, EDAMUserException.class);
-		} catch (EDAMSystemException e) {
-			LOG.error(e);
-			SessionErrors.add(request, EDAMSystemException.class);
-		} catch (TException e) {
-			LOG.error(e);
-			SessionErrors.add(request, TException.class);
+		} else {
+			SessionErrors.add(request, NOTEBOOK_EMPTY_ERROR);
 		}
-		// no matter what happens we are going back to create note page
-		actionResponse.setRenderParameter(JSP_PAGE, getInitParameter(CREATE_NOTE_JSP));
+		
+		if (!SessionErrors.isEmpty(request)) {
+			response.setRenderParameter(MVC_PATH, getInitParameter(CREATE_NOTE_JSP));
+		}
+		
 	}
 
-	public void deleteNote(ActionRequest actionRequest,
-			ActionResponse actionResponse) {
-		HttpServletRequest request = PortalUtil
-				.getHttpServletRequest(actionRequest);
+	public void deleteNote(ActionRequest request,
+			ActionResponse response) {
 
-		PortletSession portletSession = actionRequest.getPortletSession();
+		PortletSession portletSession = request.getPortletSession();
 		String accessToken = (String) portletSession.getAttribute(ACCESS_TOKEN);
 
 		EvernoteAuth evernoteAuth = new EvernoteAuth(EVERNOTE_SERVICE,
@@ -461,7 +470,7 @@ public class EvernotePortlet extends MVCPortlet {
 		try {
 			noteStoreClient = new ClientFactory(evernoteAuth)
 					.createNoteStoreClient();
-			String noteGuid = ParamUtil.getString(actionRequest,
+			String noteGuid = ParamUtil.getString(request,
 				NOTE_GUID_DELETE);
 			if (!Validator.isNull(noteGuid)) {
 				noteStoreClient.deleteNote(noteGuid);
@@ -489,19 +498,8 @@ public class EvernotePortlet extends MVCPortlet {
 			SessionErrors.add(request, NoNoteException.class);
 		}
 		
-		actionResponse.setRenderParameter(JSP_PAGE, viewTemplate);
-	}
-
-	public static void returnJSON(PortletResponse response, Object jsonObj) {
-		HttpServletResponse servletResponse = PortalUtil
-				.getHttpServletResponse(response);
-		PrintWriter pw;
-		try {
-			pw = servletResponse.getWriter();
-			pw.write(jsonObj.toString());
-			pw.close();
-		} catch (IOException e) {
-			LOG.error(JSON_RETURNING_ERROR, e);
+		if (!SessionErrors.isEmpty(request)) {
+			response.setRenderParameter(MVC_PATH, viewTemplate);
 		}
 	}
 

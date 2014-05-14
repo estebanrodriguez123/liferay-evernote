@@ -19,6 +19,10 @@
  */
 --%>
 
+<portlet:renderURL var="viewURL">
+	<portlet:param name="mvcPath" value="/jsp/view.jsp" />
+</portlet:renderURL>
+
 <portlet:resourceURL var="selectNoteURL">
 	<portlet:param name="cmd" value="selectNote"/>
 </portlet:resourceURL>	
@@ -31,7 +35,9 @@
 	<portlet:param name="cmd" value="loadNotes"/>
 </portlet:resourceURL>	
 
-<portlet:actionURL var="deleteNoteURL" name="deleteNote"/>
+<portlet:actionURL var="deleteNoteURL" name="deleteNote">
+	<portlet:param name="redirect" value="${viewURL}" />
+</portlet:actionURL>
 
 <portlet:renderURL var="createNote">
 	<portlet:param name="mvcPath" value="/jsp/include/create_note.jsp" />
@@ -42,9 +48,7 @@
 	<div class="row-fluid">
 		<div class="evernote-page-title"><h3><liferay-ui:message key="notebooks-and-notes"/></h3></div>
 		<div class="new-note-btn-wrapper">
-			<a href="${createNote}">
-				<button class="btn btn-primary" type="button"><liferay-ui:message key="create-note"/></button>
-			</a>
+			<aui:button name="create-note" value="create-note" href="${createNote}" icon="icon-plus" cssClass="btn-primary" />
 		</div>
 	</div>
 	<div class="row-fluid">
@@ -68,7 +72,7 @@
                     <aui:input type="hidden" name="noteGuidDelete" />
 		        	<aui:button-row>
                     	<aui:button name="deleteNote" value="delete"/>
-                    	<aui:a id="editNoteURL" href="javascript:void(0);" target="_blank" cssClass="btn">
+                    	<aui:a id="editNoteURL" href="#" target="_blank" cssClass="btn">
                     		<liferay-ui:message key="edit-in-evernote"/>
                     	</aui:a>
         			</aui:button-row>
