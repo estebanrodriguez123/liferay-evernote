@@ -65,13 +65,6 @@
     padding-right: 0.5em;
 }
 
-/*#note-wrapper * {
-    display: block;
-    width: 90%;
-    padding: 1em;
-    border: none;
-}*/
-
 #note-wrapper *:focus {
     outline: 0;
     box-shadow: none;
