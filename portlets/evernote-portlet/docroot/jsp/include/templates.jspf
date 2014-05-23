@@ -46,7 +46,7 @@
     {{/each}}
 </script>
 <script id="ajax-loader-icon" type="text/x-html-template">
-    <img src='../images/ajax-loader-big.gif' />
+    <img src="${themeDisplay.pathThemeImages}/application/loading_indicator.gif" />
 </script>
 <script id="frame-content" type="text/x-html-template">
     <span class="select-note"><liferay-ui:message key="select-note-left-menu"/></span>

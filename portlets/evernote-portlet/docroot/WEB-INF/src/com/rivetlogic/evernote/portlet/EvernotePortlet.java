@@ -86,6 +86,7 @@ import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.theme.ThemeDisplay;
@@ -363,17 +364,18 @@ public class EvernotePortlet extends MVCPortlet {
 			// API
 			// Overview at
 			// http://dev.evernote.com/documentation/cloud/chapters/ENML.php
-			String content = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-					+ "<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">"
-					+ "<en-note>"
-					+ ParamUtil.getString(actionRequest, "newNoteContent")
-					+ "</en-note>";
+			StringBundler sb = new StringBundler();
+			sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
+			  .append("<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">")
+			  .append("<en-note>")
+			  .append(ParamUtil.getString(actionRequest, "newNoteContent"))
+			  .append("</en-note>");
 
 			String notebookGuid = ParamUtil.getString(actionRequest,
 				NEW_NOTE_NOTEBOOK);
 
 			note.setTitle(title);
-			note.setContent(content);
+			note.setContent(sb.toString());
 			if (!notebookGuid.isEmpty())
 				note.setNotebookGuid(notebookGuid);
 

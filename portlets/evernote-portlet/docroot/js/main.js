@@ -47,10 +47,14 @@ AUI.add('evernote-portlet', function (Y, NAME) {
         },
         
         showAjaxLoader: function() {
-        	var html = Y.one("#ajax-loader-icon").getHTML();
+        	var html = Y.one("#ajax-loader-icon").getHTML();	
         	Y.one("#notes-list").append(html);
         },
         
+        hideAjaxLoader: function(){
+        	Y.one("#notes-list").one('img').remove();
+        },
+       
         renderNoteList: function(data) {
             var instance = this,
             	source   = Y.one('#note-list-template').getHTML(),
@@ -72,7 +76,7 @@ AUI.add('evernote-portlet', function (Y, NAME) {
             });
             /* Overriding Frame Styles after loading */
             frame.after("ready", function() {
-                frameContainer.all(".ajax-loader").remove();
+                frameContainer.all(".ajax-loader").hide();
             	frame._iframe.setAttribute("style", instance.CONSTANTS.FRAME_BORDER_STYLE);
             	var fi = frame.getInstance();
             	fi.one("html").setAttribute("style", instance.CONSTANTS.FRAME_HTML_STYLE);
@@ -106,16 +110,20 @@ AUI.add('evernote-portlet', function (Y, NAME) {
 
         getNote: function(guid) {
         	var me = this,
+        		pns = this.get('portletNamespace'),
         		data = Liferay.Util.ns(
                     this.get('portletNamespace'),
                     {
                         noteGuid: guid
                     });
-        	
+        	me.get('frame').set('content', me.CONSTANTS.NOT_CONTENT);
+        	var frameContainer = Y.one('#' + pns + 'preview-frame-container');
+        	frameContainer.all(".ajax-loader").show();
             this.executeAjax(
             	{data: data},
                 function(d) {
             		me.renderIframe(d);
+            		frameContainer.all(".ajax-loader").hide();
                 },
                 this.get('selectNoteURL'));
         },
@@ -144,8 +152,7 @@ AUI.add('evernote-portlet', function (Y, NAME) {
         },
         
         editNoteListener: function(){
-        	var instance = this,
-        		container = this.get("contentBox"),
+        	var container = this.get("contentBox"),
         		pns = this.get("portletNamespace"),
         		editNoteButton = container.one("#"+pns+"editNoteURL");
         	
@@ -164,7 +171,7 @@ AUI.add('evernote-portlet', function (Y, NAME) {
         	
         	if (notesList) {
         		notesList.delegate("click", function(e){
-                    
+        			instance.showAjaxLoader();
         			var notebook = e.currentTarget,
                         guid = notebook.getAttribute("id"),		
     				    notes = notebook.get("parentNode").get("childNodes"),
@@ -207,6 +214,7 @@ AUI.add('evernote-portlet', function (Y, NAME) {
     							} 
     							
     							if(loadMore) noteListUL.appendChild(loadMoreLI);
+    							instance.hideAjaxLoader();
     			  			}
     					}
     				});	
@@ -251,7 +259,8 @@ AUI.add('evernote-portlet', function (Y, NAME) {
     		FRAME_HTML_STYLE	: "margin: 10px;",
     		FRAME_BODY_STYLE	: "background: none repeat scroll 0 0 rgba(0, 0, 0, 0);",
     		FRAME_MESSAGE_STYLE : ".select-note {color: #A9A9A9}",
-    		LI_ELEMENT			: "LI"
+    		LI_ELEMENT			: "LI",
+    		NOT_CONTENT			: ""
         }
     },
     {

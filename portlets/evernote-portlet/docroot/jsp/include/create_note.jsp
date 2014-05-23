@@ -61,11 +61,12 @@
 	                			<aui:option label="default-notebook" value=""/>
 	                		</aui:select>
 	                	</div>
-	                	<div class="notebook-selector-loader"><img id="evernote-small-loader" src="${pageContext.request.contextPath}/images/ajax-loader.gif" /></div>
+	                	<div class="notebook-selector-loader"><img id="evernote-small-loader" src="${themeDisplay.pathThemeImages}/application/loading_indicator.gif" /></div>
 	                </div>
 	                <div id="note-wrapper">
 	                	<aui:input name="newNoteTitle" placeholder="title" label="" type="text"/>
-	                	<aui:input name="newNoteContent" placeholder="note-content" label="" type="textarea" cssClass="evernote-textarea"/>
+	                	<aui:input name="newNoteContent"  type="hidden"/>
+	                	<liferay-ui:input-editor toolbarSet="liferay" />
 	                </div>
 	                <aui:button name="createNote" value="create" type="submit" cssClass="btn-primary"/>
 	            </aui:form>
@@ -122,9 +123,14 @@
 	
 	A.one("#${pns}createNoteForm").on("submit", function(e){
 		e.halt();
+		
 		var form = e.target,
-			title = A.Lang.trim(form.one("#${pns}newNoteTitle").get("value")),
-			text = A.Lang.trim(form.one("#${pns}newNoteContent").get("value"));
+			editor = window.${pns}editor,
+			content = form.one("#${pns}newNoteContent");
+			
+		content.val(editor.getHTML());
+		var title = A.Lang.trim(form.one("#${pns}newNoteTitle").get("value")),
+			text = A.Lang.trim(content.get("value"));
 		if (!title && !text)  {
 			if (confirm(Liferay.Language.get("empty-note-alert"))){
 				form.submit();
@@ -145,4 +151,10 @@
 			alert(Liferay.Language.get("create-notebook-alert"));
 		}
 	});
+</aui:script>
+
+<aui:script>
+	function <portlet:namespace/>initEditor() {
+		return ""; 
+	}
 </aui:script>
