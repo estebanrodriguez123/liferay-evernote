@@ -61,7 +61,7 @@
 	                			<aui:option label="default-notebook" value=""/>
 	                		</aui:select>
 	                	</div>
-	                	<div class="notebook-selector-loader"><img id="evernote-small-loader" src="${pageContext.request.contextPath}/images/ajax-loader.gif" /></div>
+	                	<div class="notebook-selector-loader"><img id="evernote-small-loader" src="${themeDisplay.pathThemeImages}/application/loading_indicator.gif" /></div>
 	                </div>
 	                <div id="note-wrapper">
 	                	<aui:input name="newNoteTitle" placeholder="title" label="" type="text"/>
