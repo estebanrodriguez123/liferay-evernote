@@ -104,6 +104,7 @@ AUI.add('evernote-portlet', function (Y, NAME) {
 				pns = this.get('portletNamespace');
 
         	this.get('frame').set('content', noteContent);
+        	this.get('frame').show();
         	Y.one("#"+pns+"editNoteURL").setAttribute('href', editNoteURL);
 			Y.one('#' + pns + 'noteGuidDelete').setAttribute("value", data.guid);
         },
@@ -116,7 +117,7 @@ AUI.add('evernote-portlet', function (Y, NAME) {
                     {
                         noteGuid: guid
                     });
-        	me.get('frame').set('content', me.CONSTANTS.NOT_CONTENT);
+        	me.get('frame').hide();
         	var frameContainer = Y.one('#' + pns + 'preview-frame-container');
         	frameContainer.all(".ajax-loader").show();
             this.executeAjax(
@@ -259,8 +260,7 @@ AUI.add('evernote-portlet', function (Y, NAME) {
     		FRAME_HTML_STYLE	: "margin: 10px;",
     		FRAME_BODY_STYLE	: "background: none repeat scroll 0 0 rgba(0, 0, 0, 0);",
     		FRAME_MESSAGE_STYLE : ".select-note {color: #A9A9A9}",
-    		LI_ELEMENT			: "LI",
-    		NOT_CONTENT			: ""
+    		LI_ELEMENT			: "LI"
         }
     },
     {
