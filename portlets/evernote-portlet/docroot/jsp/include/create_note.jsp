@@ -66,7 +66,7 @@
 	                <div id="note-wrapper">
 	                	<aui:input name="newNoteTitle" placeholder="title" label="" type="text"/>
 	                	<aui:input name="newNoteContent"  type="hidden"/>
-	                	<liferay-ui:input-editor toolbarSet="liferay" />
+	                	<liferay-ui:input-editor toolbarSet="evernote" />
 	                </div>
 	                <aui:button name="createNote" value="create" type="submit" cssClass="btn-primary"/>
 	            </aui:form>
